@@ -19,12 +19,10 @@ queueConfig = {
 loggerConfig = {
   accountName: "ACCOUNT_NAME"
   accountKey: "ACCOUNT_KEY"
-  container: logContainer
-  level: logLevel
-  name: new Date().toString()
+  container: "CONTAINER_NAME"
+  name: "LOG_NAME"
+  level: "LOG_LEVEL"
 }
-
-winston.info "SynchronizationJob-config", { azureConfig, queueConfig }
 
 new LongTaskQueueBuilder()
   .withLogger loggerConfig

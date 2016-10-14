@@ -1,2 +1,4 @@
 
-module.exports = require "./longTaskQueueReader"
+module.exports =
+  LongTaskQueueReader: require "./longTaskQueueReader"
+  Builder: require "./longTaskQueueReaderBuilder"
