@@ -17,7 +17,7 @@
     "convert-units": "^1.2.0",
     "debug": "^2.2.0",
     "winston": "^2.2.0",
-    "winston-azure-blob-transport": "^0.1.0"
+    "winston-azure-blob-transport": "^0.2.0"
   },
   "devDependencies": {
     "bluebird": "3.4.1",
