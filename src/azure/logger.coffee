@@ -9,7 +9,7 @@ module.exports =
   class AzureLogger
 
     constructor: ({@accountName, @accountKey, @container, @name, @level = "info"}) ->
-      @transport = new (winston.transports.AzureBlob)
+      @_transport = new (winston.transports.AzureBlob)
         account:
           name: @accountName
           key: @accountKey
@@ -17,7 +17,6 @@ module.exports =
         blobName: @name
         level: @level
 
-    initialize: ->
-      @transport.initialize()
+    initialize: -> @_transport.initialize()
 
-    transport: -> @transport
+    transport: -> @_transport
