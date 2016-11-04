@@ -27,7 +27,7 @@ module.exports =
     remove: ({messageId, popReceipt}) ->
       debug "Removing message: [messageId: #{messageId}, popReceipt: #{popReceipt}]"
       @client.deleteMessageAsync @queueName, messageId, popReceipt
-      .tap -> "Removed messageId: #{messageId}"
+      .tap -> debug "Removed messageId: #{messageId}"
 
     push: (message) ->
       @client.putMessageAsync @queueName, message
