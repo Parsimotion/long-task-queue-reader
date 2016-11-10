@@ -3,6 +3,7 @@ winston = require "winston"
 Promise = require "bluebird"
 { EventEmitter } = require "events"
 convert = require "convert-units"
+KeepAliveMessage = require "./keepAliveMessage"
 
 eventsToLog = (logger) ->
   "job_get_messages": -> logger.info "Obteniendo sincronizaciones nuevas"
@@ -44,17 +45,19 @@ module.exports =
       if _.isEmpty message then convert(@waitingTime).from("s").to("ms") else 0
 
     _execute: (message) =>
-      intervalHandler = setInterval (=>
-        @_touch(message)
-      ), @_timeToTouch()
+      keepAliveMessage = @_createKeepAlive message
 
       @emit "synchronization_start", message
+      keepAliveMessage.start()
       new @MessageExecutor(@runner, message)
       .execute()
       .tap => @_removeSafety message
       .catch (err) => @emit "job_error", { method: "_execute", err }
-      .tap -> clearInterval intervalHandler
+      .tap -> keepAliveMessage.destroy()
       .then => @emit "synchronization_finish", message
+
+    _createKeepAlive: (message) =>
+      new KeepAliveMessage message, @visibilityTimeout, @_touch
 
     _removeSafety: (message) =>
       @queue.remove message
@@ -65,5 +68,3 @@ module.exports =
       @queue.update @visibilityTimeout, message
       .tap (response) -> _.assign message, popReceipt: response.popReceipt
       .catch (err) => @emit "job_error", { method: "_touch", err }
-
-    _timeToTouch: => convert(@visibilityTimeout).from("s").to("ms") / 2
