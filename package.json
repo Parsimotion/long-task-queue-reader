@@ -1,6 +1,6 @@
 {
   "name": "long-task-queue-reader",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "long-task-queue-reader",
   "main": "index.js",
   "scripts": {
