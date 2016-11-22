@@ -14,13 +14,13 @@
   "dependencies": {
     "azure-queue-node": "^1.1.0",
     "azure-storage": "^1.3.1",
+    "bluebird": "3.4.1",
     "convert-units": "^1.2.0",
     "debug": "^2.2.0",
     "winston": "^2.2.0",
     "winston-azure-blob-transport": "^0.2.2"
   },
   "devDependencies": {
-    "bluebird": "3.4.1",
     "coffee-script": "1.11.0",
     "grunt": "1.0.1",
     "grunt-bump": "0.8.0",
