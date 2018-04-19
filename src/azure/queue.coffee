@@ -1,7 +1,6 @@
 _ = require "lodash"
 AzureQueueNode = require "azure-queue-node"
 Promise = require "bluebird"
-azure = include("config/environment").azure
 
 debug = require("debug")("long-task-queue-reader:queue")
 
