@@ -10,9 +10,12 @@ module.exports =
     constructor: ({accountKey, accountName, @queueName}) ->
       @client = @_buildClient accountName, accountKey
 
-    initialize: -> @create()
+    initialize: => Promise.map [ @queueName, @_poisonQueueName() ], @create
 
-    create: -> @client.createQueueAsync @queueName
+    create: (queue) => @client.createQueueAsync queue
+
+    sendToPoison: (message) ->  
+      @pushPoison message.messageText
 
     messages: (opts = {}) ->
       @client.getMessagesAsync @queueName, opts
@@ -28,7 +31,13 @@ module.exports =
       @client.deleteMessageAsync @queueName, messageId, popReceipt
       .tap -> debug "Removed messageId: #{messageId}"
 
-    push: (message) ->
+    push: (message) -> @_push message, @queueName
+    
+    pushPoison: (message) -> @_push message, @_poisonQueueName()
+
+    _poisonQueueName: -> "#{@queueName}-poison"
+
+    _push: (message, queueName) ->
       @client.putMessageAsync @queueName, message
 
     _buildClient: (accountName, accountKey) ->
