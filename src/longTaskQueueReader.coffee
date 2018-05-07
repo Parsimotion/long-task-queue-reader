@@ -37,13 +37,9 @@ module.exports =
         visibilityTimeout: @visibilityTimeout
       }
       .get 0
-      .tap (message) => @_executeIfShould(message)
+      .tap (message) => @_execute(message) if message?
       .tap => @emit "job_finish_messages"
       .catch (err) => @emit "job_error", { method: "_executePendingSynchronization", err }
-    
-    _executeIfShould: (message) =>
-      shouldExecute = message? and @_buildExecutor(message).shouldExecute()
-      @_execute(message) if shouldExecute
     
     _nextTimeout: (message) =>
       if _.isEmpty message then convert(@waitingTime).from("s").to("ms") else 0
