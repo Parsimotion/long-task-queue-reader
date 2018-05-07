@@ -6,7 +6,9 @@ debug = require("debug")("long-task-queue-reader:message-executor")
 
 module.exports =
   class AzureMessageExecutor
-    constructor: (@runner, @message) ->
+    constructor: ({ @runner, @message, @maxRetries } = {}) ->
     execute: ->
       debug "Processing %o", @message.messageText
       Promise.method(@runner) @message.messageText
+    shouldExecute: ->
+      @message.dequeueCount <= @maxRetries 

@@ -53,7 +53,7 @@ module.exports =
 
       @emit "synchronization_start", message
       keepAliveMessage.start()
-      new @MessageExecutor(@runner, message)
+      new @MessageExecutor({ @runner, message, @maxRetries })
       .execute()
       .tap => @_removeSafety message
       .catch (err) => @emit "job_error", { method: "_execute", err }
