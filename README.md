@@ -28,6 +28,7 @@ new LongTaskQueueBuilder()
   .withLogger loggerConfig
   .withQueue queueConfig
   .withRunner (message) -> new SynchronizationRunner(message).run()
+  .withMaxRetries(10)
   .build()
   .then (queueReader) -> queueReader.start()
 
