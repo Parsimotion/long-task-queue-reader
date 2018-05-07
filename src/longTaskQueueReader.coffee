@@ -42,18 +42,20 @@ module.exports =
       .catch (err) => @emit "job_error", { method: "_executePendingSynchronization", err }
     
     _executeIfShould: (message) =>
-      shouldExecute = message? and message.dequeueCount < @maxRetries
+      shouldExecute = message? and @_buildExecutor(message).shouldExecute()
       @_execute(message) if shouldExecute
     
     _nextTimeout: (message) =>
       if _.isEmpty message then convert(@waitingTime).from("s").to("ms") else 0
-
+      
+    _buildExecutor: (message) => new @MessageExecutor { @runner, message, @maxRetries }
+    
     _execute: (message) =>
       keepAliveMessage = @_createKeepAlive message
 
       @emit "synchronization_start", message
       keepAliveMessage.start()
-      new @MessageExecutor({ @runner, message, @maxRetries })
+      @_buildExecutor message
       .execute()
       .tap => @_removeSafety message
       .catch (err) => @emit "job_error", { method: "_execute", err }
