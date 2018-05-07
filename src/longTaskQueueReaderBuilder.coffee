@@ -27,9 +27,11 @@ module.exports =
       @
 
     withRunner: (@runner) -> @
+    
+    withMaxRetries: (@maxRetries) -> @
 
     build: ->
       Promise.map @dependencies, (dependency) -> dependency.initialize()
-      .then => new QueueProcessor @queue, { @waitingTime, @timeToUpdateMessage }, { @transports }, (@_internalRequire "messageExecutor"), @runner
+      .then => new QueueProcessor @queue, { @waitingTime, @timeToUpdateMessage, @maxRetries }, { @transports }, @_internalRequire("messageExecutor"), @runner
 
     _internalRequire: (name) -> require "./#{@implementation}/#{name}"

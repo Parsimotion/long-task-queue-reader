@@ -4,6 +4,7 @@ Promise = require "bluebird"
 { EventEmitter } = require "events"
 convert = require "convert-units"
 KeepAliveMessage = require "./keepAliveMessage"
+MaxRetriesExceededException = require "./maxRetriesExceededException"
 
 eventsToLog = (logger) ->
   "job_get_messages": -> logger.info "Obteniendo sincronizaciones nuevas"
@@ -16,7 +17,7 @@ eventsToLog = (logger) ->
 module.exports =
   class LongTaskQueueReader extends EventEmitter
 
-    constructor: (@queue, { @waitingTime = 60, @visibilityTimeout = 60 }, { level = "info", transports = []}, @MessageExecutor, @runner) ->
+    constructor: (@queue, { @waitingTime = 60, @visibilityTimeout = 60, @maxRetries = 10 }, { level = "info", transports = []}, @MessageExecutor, @runner) ->
       logger = new winston.Logger { level, transports }
       for eventName, action of eventsToLog logger
         @on "#{eventName}", action
@@ -43,18 +44,25 @@ module.exports =
 
     _nextTimeout: (message) =>
       if _.isEmpty message then convert(@waitingTime).from("s").to("ms") else 0
+      
+    _buildExecutor: (message) => new @MessageExecutor { @runner, message, @maxRetries }
 
     _execute: (message) =>
       keepAliveMessage = @_createKeepAlive message
 
       @emit "synchronization_start", message
       keepAliveMessage.start()
-      new @MessageExecutor(@runner, message)
+      @_buildExecutor message
       .execute()
       .tap => @_removeSafety message
+      .catch MaxRetriesExceededException, (e) => @_sendToPoison message
       .catch (err) => @emit "job_error", { method: "_execute", err }
       .tap -> keepAliveMessage.destroy()
       .then => @emit "synchronization_finish", message
+
+    _sendToPoison: (message) =>
+      @queue.sendToPoison message
+      .then => @_removeSafety message
 
     _createKeepAlive: (message) =>
       new KeepAliveMessage message, @visibilityTimeout, @_touch

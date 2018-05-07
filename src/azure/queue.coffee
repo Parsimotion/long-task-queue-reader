@@ -10,9 +10,12 @@ module.exports =
     constructor: ({accountKey, accountName, @queueName}) ->
       @client = @_buildClient accountName, accountKey
 
-    initialize: -> @create()
+    initialize: => Promise.map [ @queueName, @_poisonQueueName() ], @create
 
-    create: -> @client.createQueueAsync @queueName
+    create: (queue) => @client.createQueueAsync queue
+
+    sendToPoison: (message) ->  
+      @pushPoison message.messageText
 
     messages: (opts = {}) ->
       @client.getMessagesAsync @queueName, opts
@@ -28,8 +31,11 @@ module.exports =
       @client.deleteMessageAsync @queueName, messageId, popReceipt
       .tap -> debug "Removed messageId: #{messageId}"
 
-    push: (message) ->
-      @client.putMessageAsync @queueName, message
+    push: (message) -> @client.putMessageAsync @queueName, message
+    
+    pushPoison: (message) -> @client.putMessageAsync @_poisonQueueName(), message
+
+    _poisonQueueName: -> "#{@queueName}-poison"
 
     _buildClient: (accountName, accountKey) ->
       client = AzureQueueNode.createClient
