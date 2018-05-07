@@ -31,14 +31,11 @@ module.exports =
       @client.deleteMessageAsync @queueName, messageId, popReceipt
       .tap -> debug "Removed messageId: #{messageId}"
 
-    push: (message) -> @_push message, @queueName
+    push: (message) -> @client.putMessageAsync @queueName, message
     
-    pushPoison: (message) -> @_push message, @_poisonQueueName()
+    pushPoison: (message) -> @client.putMessageAsync @_poisonQueueName(), message
 
     _poisonQueueName: -> "#{@queueName}-poison"
-
-    _push: (message, queueName) ->
-      @client.putMessageAsync @queueName, message
 
     _buildClient: (accountName, accountKey) ->
       client = AzureQueueNode.createClient
