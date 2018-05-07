@@ -49,8 +49,7 @@ module.exports =
     
     _executeCheckRetry: (message) =>
       @_execute(message) 
-      .catch MaxRetriesExceededException, (err) => 
-        @queue.sendToPoison(@message).then => throw err
+      .catch MaxRetriesExceededException, => @queue.sendToPoison(@message)
 
     _execute: (message) =>
       keepAliveMessage = @_createKeepAlive message
