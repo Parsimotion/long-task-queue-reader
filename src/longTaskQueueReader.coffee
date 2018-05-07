@@ -38,7 +38,7 @@ module.exports =
         visibilityTimeout: @visibilityTimeout
       }
       .get 0
-      .tap (message) => @_executeCheckRetry(message) if message?
+      .tap (message) => @_execute(message) if message?
       .tap => @emit "job_finish_messages"
       .catch (err) => @emit "job_error", { method: "_executePendingSynchronization", err }
 
@@ -46,10 +46,6 @@ module.exports =
       if _.isEmpty message then convert(@waitingTime).from("s").to("ms") else 0
       
     _buildExecutor: (message) => new @MessageExecutor { @runner, message, @maxRetries }
-    
-    _executeCheckRetry: (message) =>
-      @_execute(message) 
-      .catch MaxRetriesExceededException, => @queue.sendToPoison(@message)
 
     _execute: (message) =>
       keepAliveMessage = @_createKeepAlive message
@@ -59,9 +55,14 @@ module.exports =
       @_buildExecutor message
       .execute()
       .tap => @_removeSafety message
+      .catch MaxRetriesExceededException, (e) => @_sendToPoison message
       .catch (err) => @emit "job_error", { method: "_execute", err }
       .tap -> keepAliveMessage.destroy()
       .then => @emit "synchronization_finish", message
+
+    _sendToPoison: (message) =>
+      @queue.sendToPoison message
+      .then => @_removeSafety message
 
     _createKeepAlive: (message) =>
       new KeepAliveMessage message, @visibilityTimeout, @_touch
