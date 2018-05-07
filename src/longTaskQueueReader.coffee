@@ -16,7 +16,7 @@ eventsToLog = (logger) ->
 module.exports =
   class LongTaskQueueReader extends EventEmitter
 
-    constructor: (@queue, { @waitingTime = 60, @visibilityTimeout = 60 }, { level = "info", transports = []}, @MessageExecutor, @runner) ->
+    constructor: (@queue, { @waitingTime = 60, @visibilityTimeout = 60, @maxRetries = 10 }, { level = "info", transports = []}, @MessageExecutor, @runner) ->
       logger = new winston.Logger { level, transports }
       for eventName, action of eventsToLog logger
         @on "#{eventName}", action
@@ -37,10 +37,14 @@ module.exports =
         visibilityTimeout: @visibilityTimeout
       }
       .get 0
-      .tap (message) => @_execute(message) if message?
+      .tap (message) => @_executeIfShould(message)
       .tap => @emit "job_finish_messages"
       .catch (err) => @emit "job_error", { method: "_executePendingSynchronization", err }
-
+    
+    _executeIfShould: (message) =>
+      shouldExecute = message? and message.dequeueCount < @maxRetries
+      @_execute(message) if shouldExecute
+    
     _nextTimeout: (message) =>
       if _.isEmpty message then convert(@waitingTime).from("s").to("ms") else 0
 
