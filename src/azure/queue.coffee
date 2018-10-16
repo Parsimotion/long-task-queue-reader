@@ -39,7 +39,7 @@ module.exports =
 
     _buildClient: (accountName, accountKey) ->
       client = AzureQueueNode.createClient
-        accountUrl: "http://#{accountName}.queue.core.windows.net/"
+        accountUrl: "https://#{accountName}.queue.core.windows.net/"
         accountName: accountName
         accountKey: accountKey
         base64: true
