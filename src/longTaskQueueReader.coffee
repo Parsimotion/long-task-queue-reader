@@ -7,11 +7,11 @@ KeepAliveMessage = require "./keepAliveMessage"
 MaxRetriesExceededException = require "./maxRetriesExceededException"
 
 eventsToLog = (logger) ->
-  "job_get_messages": -> logger.info "Obteniendo sincronizaciones nuevas"
-  "job_finish_messages": -> logger.info "Finalizo la ejecucion de sincronizaciones"
-  "synchronization_start": (message) -> logger.info "Iniciando la sincronizacion", message
-  "synchronization_finish": (message) -> logger.info "Finalizo la sincronizacion", message
-  "synchronization_touch": ({messageId, messageText}) -> logger.info "Touching #{messageId}", messageText
+  "job-get-messages": -> logger.info "Obteniendo mensajes nuevas"
+  "job-finish-messages": -> logger.info "Finalizo la ejecucion de mensajes"
+  "message-start": (message) -> logger.info "Iniciando el proceso de un mensaje", message
+  "message-finish": (message) -> logger.info "Finalizo la ejecucion de un proceso", message
+  "message-touch": ({messageId, messageText}) -> logger.info "Touching #{messageId}", messageText
   "job_error": ({method, err}) -> logger.error "An error has ocurred in #{method}", err
 
 module.exports =
@@ -31,7 +31,7 @@ module.exports =
         return
 
     _executePendingSynchronization: =>
-      @emit "job_get_messages"
+      @emit "job-get-messages"
 
       @queue.messages {
         maxMessages: 1,
@@ -39,7 +39,7 @@ module.exports =
       }
       .get 0
       .tap (message) => @_execute(message) if message?
-      .tap => @emit "job_finish_messages"
+      .tap => @emit "job-finish-messages"
       .catch (err) => @emit "job_error", { method: "_executePendingSynchronization", err }
 
     _nextTimeout: (message) =>
@@ -50,7 +50,7 @@ module.exports =
     _execute: (message) =>
       keepAliveMessage = @_createKeepAlive message
 
-      @emit "synchronization_start", message
+      @emit "message-start", message
       keepAliveMessage.start()
       @_buildExecutor message
       .execute()
@@ -58,7 +58,7 @@ module.exports =
       .catch MaxRetriesExceededException, (e) => @_sendToPoison message
       .catch (err) => @emit "job_error", { method: "_execute", err }
       .tap -> keepAliveMessage.destroy()
-      .then => @emit "synchronization_finish", message
+      .then => @emit "message-finish", message
 
     _sendToPoison: (message) =>
       @queue.sendToPoison message
@@ -72,7 +72,7 @@ module.exports =
       .catch (err) => @emit "job_error", { method: "_removeSafety", err }
 
     _touch: (message) =>
-      @emit "synchronization_touch", message
+      @emit "message-touch", message
       @queue.update @visibilityTimeout, message
       .tap (response) -> _.assign message, popReceipt: response.popReceipt
       .catch (err) => @emit "job_error", { method: "_touch", err }
