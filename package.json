@@ -19,7 +19,7 @@
     "convert-units": "~1.2.0",
     "debug": "~2.2.0",
     "winston": "~2.2.0",
-    "winston-azure-blob-transport": "~0.2.2"
+    "winston-azure-blob-transport": "^0.2.11"
   },
   "devDependencies": {
     "coffee-script": "~1.11.0",
