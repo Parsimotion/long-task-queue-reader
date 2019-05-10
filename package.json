@@ -1,6 +1,6 @@
 {
   "name": "long-task-queue-reader",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "long-task-queue-reader",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,7 @@
     "bluebird": "~3.4.1",
     "convert-units": "~1.2.0",
     "debug": "~2.2.0",
-    "winston": "~2.2.0",
+    "winston": "^2.2.0",
     "winston-azure-blob-transport": "^0.2.11"
   },
   "devDependencies": {
