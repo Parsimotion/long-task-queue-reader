@@ -18,8 +18,8 @@
     "bluebird": "~3.4.1",
     "convert-units": "~1.2.0",
     "debug": "~2.2.0",
-    "winston": "^2.2.0",
-    "winston-azure-blob-transport": "^0.2.11"
+    "winston": "^2.4.4",
+    "winston-azure-blob-transport": "^0.3.3"
   },
   "devDependencies": {
     "coffee-script": "~1.11.0",
