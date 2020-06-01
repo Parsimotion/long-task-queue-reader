@@ -3,7 +3,7 @@ AWS = require 'aws-sdk'
 Promise = require "bluebird"
 
 debug = require("debug")("long-task-queue-reader:queue")
-
+tryParse = (it) -> try JSON.parse(it)
 module.exports =
   class Queue
 
@@ -27,10 +27,10 @@ module.exports =
         VisibilityTimeout: opts.visibilityTimeout or 120,
         WaitTimeSeconds: opts.visibilityTimeout or 0
       }
-      .tap (data) -> 
+      .then (data) -> 
         return [] unless data.Messages
-        debug "Received Messages: %o", _.map(data.Messages, 'Body') 
-        data.Messages = data.Messages.map (it) => _.update(it, "Body", JSON.parse)
+        debug "Received Messages: %o", _.map(data.Messages, 'Body')
+        data.Messages.map (it) => _.update(it, "Body", tryParse)
 
     update: (timeout, { MessageId, ReceiptHandle, Body }) ->
       debug "Updating [timeout: #{timeout}, messageId: #{MessageId}, popReceipt: #{ReceiptHandle}, messageText: #{JSON.stringify Body}]"
