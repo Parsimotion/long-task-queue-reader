@@ -61,5 +61,5 @@ module.exports =
 
     _buildClient: ({ accessKey, secretKey, region = "us-east-1" }) ->
       AWS.config.update { accessKey, secretKey, region }
-      Promise.promisifyAll new AWS.SQS {}
+      Promise.promisifyAll new AWS.SQS({}), filter: (functionName) -> !_(functionName).endsWith("Async")
 
