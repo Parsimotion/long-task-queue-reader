@@ -59,7 +59,7 @@ module.exports =
 
     _queueName: (queueUrl) -> _(queueUrl.split("/")).last()
 
-    _buildClient: ({ accountName, accountKey, region = "us-east-1" }) ->
-      AWS.config.update { region }
+    _buildClient: ({ accessKey, secretKey, region = "us-east-1" }) ->
+      AWS.config.update { accessKey, secretKey, region }
       Promise.promisifyAll new AWS.SQS {}
 
