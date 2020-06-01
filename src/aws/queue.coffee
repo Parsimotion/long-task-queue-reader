@@ -16,7 +16,7 @@ module.exports =
     create: (queueUrl) => @client.createQueueAsync QueueName: @_queueName queueUrl
 
     sendToPoison: (message) ->  
-      @pushPoison message.messageText
+      @pushPoison message.Body
 
     messages: (opts = {}) ->
       @client.receiveMessageAsync {
