@@ -27,7 +27,10 @@ module.exports =
         VisibilityTimeout: opts.visibilityTimeout or 120,
         WaitTimeSeconds: opts.visibilityTimeout or 0
       }
-      .tap ({ Messages }) -> debug "Received Messages: %o", _.map(Messages, 'Body') if Messages
+      .tap (data) -> 
+        return [] unless data.Messages
+        debug "Received Messages: %o", _.map(data.Messages, 'Body') 
+        data.Messages = data.Messages.map (it) => _.update(it, "Body", JSON.parse)
 
     update: (timeout, { MessageId, ReceiptHandle, Body }) ->
       debug "Updating [timeout: #{timeout}, messageId: #{MessageId}, popReceipt: #{ReceiptHandle}, messageText: #{JSON.stringify Body}]"
