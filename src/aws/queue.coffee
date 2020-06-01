@@ -43,15 +43,15 @@ module.exports =
       @client.deleteMessageAsync { QueueUrl: @queueUrl, ReceiptHandle }
       .tap -> debug "Removed messageId: #{MessageId}"
 
-    push: (message) -> @client.putMessageAsync @queueUrl, message
+    push: (message) -> @_push @queueUrl, message
     
-    pushPoison: (message) -> @client.putMessageAsync @_poisonQueueUrl(), message
+    pushPoison: (message) -> @_push @_poisonQueueUrl(), message
 
     _push: (queueUrl, message) =>
       @client.sendMessageAsync {
         DelaySeconds: 0,
         MessageAttributes: {},
-        MessageBody: message,
+        MessageBody: JSON.stringify(message),
         QueueUrl: @queueUrl
       }
 
