@@ -34,7 +34,7 @@ module.exports =
 
     update: (timeout, { MessageId, ReceiptHandle, Body }) ->
       debug "Updating [timeout: #{timeout}, messageId: #{MessageId}, popReceipt: #{ReceiptHandle}, messageText: #{JSON.stringify Body}]"
-      @client.changeVisibilityTimeoutAsync {
+      @client.changeMessageVisibilityAsync {
         ReceiptHandle,
         QueueUrl: @queueUrl,
         VisibilityTimeout: timeout
