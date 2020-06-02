@@ -5,13 +5,13 @@ MaxRetriesExceededException = require "../maxRetriesExceededException"
 debug = require("debug")("long-task-queue-reader:message-executor")
 
 module.exports =
-  class AzureMessageExecutor
+  class AwsMessageExecutor
     constructor: ({ @runner, @message, @maxRetries } = {}) ->
 
     execute: ->
-      debug "Processing %o", @message.messageText
+      debug "Processing %o", @message.Body
       return Promise.reject(new MaxRetriesExceededException(@message, @maxRetries)) if @hasReachedMaxRetries()
-      Promise.method(@runner) @message.messageText
+      Promise.method(@runner) @message.Body
 
     hasReachedMaxRetries: =>
-      @message.dequeueCount > @maxRetries 
+      parseInt(@message.Attributes.ApproximateReceiveCount) > @maxRetries 

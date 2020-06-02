@@ -20,9 +20,9 @@ module.exports =
 
     messages: (opts = {}) ->
       @client.receiveMessageAsync {
-        AttributeNames: [ "SentTimestamp" ],
+        AttributeNames: [ "All" ],
         MaxNumberOfMessages: opts.maxMessages or 1,
-        MessageAttributeNames: [ "All" ],
+        MessageAttributeNames: [ ],
         QueueUrl: @queueUrl,
         VisibilityTimeout: opts.visibilityTimeout or 120,
         WaitTimeSeconds: opts.visibilityTimeout or 0
