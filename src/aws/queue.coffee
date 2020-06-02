@@ -8,7 +8,7 @@ module.exports =
   class Queue
 
     constructor: (options) ->
-      { @queueName } = options
+      @queueName = options.name
       @client = @_buildClient options
 
     initialize: => 
@@ -71,7 +71,7 @@ module.exports =
     _queueUrl: (queueName) -> 
       @client.getQueueUrlAsync QueueName: queueName
 
-    _buildClient: ({ accessKey, secretKey, region = "us-east-1" }) ->
-      AWS.config.update { accessKey, secretKey, region }
+    _buildClient: ({ access, secret, region = "us-east-1" }) ->
+      AWS.config.update { accessKey: access, secretKey: secret, region }
       Promise.promisifyAll new AWS.SQS({}), filter: (functionName) -> !_(functionName).endsWith("Async")
 

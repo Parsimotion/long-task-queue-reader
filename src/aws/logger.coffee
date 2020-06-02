@@ -8,15 +8,15 @@ require "winston-azure-blob-transport"
 module.exports =
   class AwsLogger
 
-    constructor: ({ awsAccessKeyId, awsSecretKey, awsRegion, logGroupName, logStreamName, level = "info" }) ->
+    constructor: ({ access, secret, region, logGroupName, logStreamName, level = "info" }) ->
       @_transport = new WinstonCloudWatch {
           logGroupName,
           logStreamName,
-          awsAccessKeyId,
-          awsSecretKey,
-          awsRegion: awsRegion or 'us-east-1'
+          awsAccessKeyId: access,
+          awsSecretKey: secret,
+          level,
+          awsRegion: region or 'us-east-1'
         }
-
 
     initialize: -> @_transport.initialize?()
 
