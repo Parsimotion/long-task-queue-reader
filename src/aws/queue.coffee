@@ -53,13 +53,13 @@ module.exports =
     push: (message) -> @_push @queueUrl, message
     
     pushPoison: (message) -> @_push @_poisonQueueUrl(), message
-
+    
     _push: (queueUrl, message) =>
       @client.sendMessageAsync {
         DelaySeconds: 0,
         MessageAttributes: {},
         MessageBody: JSON.stringify(message),
-        QueueUrl: @queueUrl
+        QueueUrl: queueUrl
       }
 
     _poisonQueueUrl: -> @_toPoison @queueUrl
