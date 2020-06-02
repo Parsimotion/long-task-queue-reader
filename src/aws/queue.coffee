@@ -29,7 +29,7 @@ module.exports =
         MessageAttributeNames: [ ],
         QueueUrl: @queueUrl,
         VisibilityTimeout: opts.visibilityTimeout or 120,
-        WaitTimeSeconds: opts.visibilityTimeout or 0
+        WaitTimeSeconds: opts.waitingTime or 0
       }
       .then (data) -> 
         return [] unless data.Messages

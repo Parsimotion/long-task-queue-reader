@@ -5,12 +5,11 @@ QueueProcessor = require "./longTaskQueueReader"
 module.exports =
   class LongTaskQueueReaderBuilder
 
-    constructor: ->
+    constructor: (@implementation = "azure") ->
       @transports = [
         new winston.transports.Console timestamp: true
       ]
       @dependencies = []
-      @implementation = "azure"
 
     withLogger: (opts) ->
       Logger = @_internalRequire "logger"
@@ -29,6 +28,8 @@ module.exports =
     withRunner: (@runner) -> @
     
     withMaxRetries: (@maxRetries) -> @
+    
+    withImplementation: (@implementation) -> @
 
     build: ->
       Promise.map @dependencies, (dependency) -> dependency.initialize()
