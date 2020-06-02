@@ -8,12 +8,16 @@ module.exports =
   class Queue
 
     constructor: (options) ->
-      { @queueUrl } = options
+      { @queueName } = options
       @client = @_buildClient options
 
-    initialize: => Promise.map [ @queueUrl, @_poisonQueueUrl() ], @create
+    initialize: => 
+      Promise.map [ @queueName, @_poisonQueueName() ], @create
+      .then () => @_queueUrl @queueName
+      .get "QueueUrl"
+      .then (@queueUrl) =>
 
-    create: (queueUrl) => @client.createQueueAsync QueueName: @_queueName queueUrl
+    create: (queueName) => @client.createQueueAsync QueueName: queueName
 
     sendToPoison: (message) ->  
       @pushPoison message.Body
@@ -58,9 +62,14 @@ module.exports =
         QueueUrl: @queueUrl
       }
 
-    _poisonQueueUrl: -> "#{@queueUrl}-poison"
+    _poisonQueueUrl: -> @_toPoison @queueUrl
+    
+    _poisonQueueName: -> @_toPoison @queueName
 
-    _queueName: (queueUrl) -> _(queueUrl.split("/")).last()
+    _toPoison: (it) -> "#{it}-poison"
+    
+    _queueUrl: (queueName) -> 
+      @client.getQueueUrlAsync QueueName: queueName
 
     _buildClient: ({ accessKey, secretKey, region = "us-east-1" }) ->
       AWS.config.update { accessKey, secretKey, region }
