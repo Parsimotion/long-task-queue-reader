@@ -8,7 +8,7 @@ module.exports =
   class Queue
 
     constructor: (options) ->
-      @queueName = options.name
+      @queueName = options.queueName or options.name
       @client = @_buildClient options
 
     initialize: => 
