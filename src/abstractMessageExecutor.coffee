@@ -1,6 +1,6 @@
 _ = require "lodash"
 Promise = require "bluebird"
-MaxRetriesExceededException = require "../maxRetriesExceededException"
+MaxRetriesExceededException = require "./maxRetriesExceededException"
 debug = require("debug")("long-task-queue-reader:message-executor")
 
 module.exports =
