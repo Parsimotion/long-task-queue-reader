@@ -72,6 +72,10 @@ module.exports =
       @client.getQueueUrlAsync QueueName: queueName
 
     _buildClient: ({ access, secret, region = "us-east-1" }) ->
-      AWS.config.update { accessKey: access, secretKey: secret, region }
-      Promise.promisifyAll new AWS.SQS({}), filter: (functionName) -> !_(functionName).endsWith("Async")
+      config = new AWS.Config {
+        accessKeyId: access,
+        secretAccessKey: secret,
+        region: region
+      }
+      Promise.promisifyAll new AWS.SQS(config), filter: (functionName) -> !_(functionName).endsWith("Async")
 
