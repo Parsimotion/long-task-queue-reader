@@ -8,14 +8,14 @@ module.exports =
     constructor: ({ @runner, @message, @maxRetries } = {}) ->
 
     execute: ->
-      body = @_body_ message
+      body = @_body_()
       debug "Processing %o", body
       return Promise.reject(new MaxRetriesExceededException(@message, @maxRetries)) if @hasReachedMaxRetries()
       Promise.method(@runner) body
 
     hasReachedMaxRetries: =>
-      @_receiveCount_(@message) > @maxRetries 
+      @_receiveCount_() > @maxRetries 
 
-    _body_: (message) -> throw new Error "not_implemented"
+    _body_: () -> throw new Error "not_implemented"
 
-    _receiveCount_: (message) -> throw new Error "not_implemented"
+    _receiveCount_: () -> throw new Error "not_implemented"
