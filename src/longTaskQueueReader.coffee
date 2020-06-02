@@ -11,7 +11,7 @@ eventsToLog = (logger) ->
   "job-finish-messages": -> logger.info "Finalizo la ejecucion de mensajes"
   "message-start": (message) -> logger.info "Iniciando el proceso de un mensaje", message
   "message-finish": (message) -> logger.info "Finalizo la ejecucion de un proceso", message
-  "message-touch": ({messageId, messageText}) -> logger.info "Touching #{messageId}", messageText
+  "message-touch": ({messageId, MessageId, messageText, Body}) -> logger.info "Touching #{messageId or MessageId}", messageText or Body
   "job_error": ({method, err}) -> logger.error "An error has ocurred in #{method}", err
 
 module.exports =
