@@ -7,7 +7,8 @@ debug = require("debug")("long-task-queue-reader:queue")
 module.exports =
   class Queue
 
-    constructor: ({accountKey, accountName, @queueName}) ->
+    constructor: ({accountKey, accountName, queueName, name}) ->
+      @queueName = queueName or name
       @client = @_buildClient accountName, accountKey
 
     initialize: => Promise.map [ @queueName, @_poisonQueueName() ], @create
