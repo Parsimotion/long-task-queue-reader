@@ -4,12 +4,18 @@ Promise = require "bluebird"
 
 debug = require("debug")("long-task-queue-reader:queue")
 tryParse = (it) -> try JSON.parse(it)
+queueConfigDefaults = {
+  VisibilityTimeout: "240" # seconds
+  MessageRetentionPeriod: "28800" # seconds (8 hrs)
+}
+
 module.exports =
   class Queue
 
     constructor: (options) ->
       @queueName = options.queueName or options.name
       @client = @_buildClient options
+      @attributes = _.defaults options.config, queueConfigDefaults
 
     initialize: => 
       Promise.map [ @queueName, @_poisonQueueName() ], @create
@@ -17,7 +23,7 @@ module.exports =
       .get "QueueUrl"
       .then (@queueUrl) =>
 
-    create: (queueName) => @client.createQueueAsync QueueName: queueName
+    create: (queueName) => @client.createQueueAsync { QueueName: queueName, Attributes: @attributes }
 
     sendToPoison: (message) ->  
       @pushPoison message.Body
