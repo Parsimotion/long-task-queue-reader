@@ -23,7 +23,9 @@ module.exports =
       .get "QueueUrl"
       .then (@queueUrl) =>
 
-    create: (queueName) => @client.createQueueAsync { QueueName: queueName, Attributes: @attributes }
+    create: (queueName) => 
+      @client.createQueueAsync { QueueName: queueName, Attributes: @attributes }
+      .catch (e) => throw e unless e.code is "QueueAlreadyExists"
 
     sendToPoison: (message) ->  
       @pushPoison message.Body
