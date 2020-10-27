@@ -5,7 +5,7 @@ debug = require("debug")("long-task-queue-reader:message-executor")
 
 module.exports =
   class AbstractMessageExecutor
-    constructor: ({ @runner, @message, @maxRetries, @fromPoison, @fromPoison } = {}) ->
+    constructor: ({ @runner, @message, @maxRetries, @fromPoison } = {}) ->
 
     execute: ->
       body = @_body_()
