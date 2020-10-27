@@ -5,7 +5,7 @@ QueueProcessor = require "./longTaskQueueReader"
 module.exports =
   class LongTaskQueueReaderBuilder
 
-    constructor: (@implementation = "azure") ->
+    constructor: (@implementation = "azure", @fromPoison = false) ->
       @transports = [
         new winston.transports.Console timestamp: true
       ]
@@ -19,8 +19,8 @@ module.exports =
       @
 
     withQueue: (opts) ->
-      { @waitingTime, @timeToUpdateMessage } = opts
-      Queue = @_internalRequire "queue"
+      { @waitingTime, @timeToUpdateMessage, @fromPoison } = opts
+      Queue = @_internalRequire("queue#{ if @fromPoison then ".poison" else "" }")
       @queue = new Queue opts
       @dependencies.push @queue
       @
