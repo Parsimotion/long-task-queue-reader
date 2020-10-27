@@ -19,9 +19,12 @@ module.exports =
 
     initialize: => 
       Promise.map [ @queueName, @_poisonQueueName() ], @create
-      .then () => @_queueUrl @queueName
-      .get "QueueUrl"
-      .then (@queueUrl) =>
+      .then(@_setQueueUrl)
+
+    _setQueueUrl: () =>
+      @_queueUrl @queueName
+        .get "QueueUrl"
+        .then (@queueUrl) =>
 
     create: (queueName) => 
       @client.createQueueAsync { QueueName: queueName, Attributes: @attributes }
