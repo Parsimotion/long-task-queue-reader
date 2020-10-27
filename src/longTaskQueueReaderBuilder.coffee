@@ -5,7 +5,7 @@ QueueProcessor = require "./longTaskQueueReader"
 module.exports =
   class LongTaskQueueReaderBuilder
 
-    constructor: (@implementation = "azure", @fromPoison = false) ->
+    constructor: (@implementation = "azure", @poison = false) ->
       @transports = [
         new winston.transports.Console timestamp: true
       ]
@@ -17,13 +17,15 @@ module.exports =
       @transports.push logger.transport()
       @dependencies.push logger
       @
-
+    
     withQueue: (opts) ->
       { @waitingTime, @timeToUpdateMessage } = opts
-      Queue = @_internalRequire("queue#{ if @fromPoison then ".poison" else "" }")
+      Queue = @_internalRequire("queue#{ if @poison then ".poison" else "" }")
       @queue = new Queue opts
       @dependencies.push @queue
       @
+
+    fromPoison: (@poison) -> @
 
     withRunner: (@runner) -> @
     
@@ -33,6 +35,6 @@ module.exports =
 
     build: ->
       Promise.map @dependencies, (dependency) -> dependency.initialize()
-      .then => new QueueProcessor @queue, { @waitingTime, @timeToUpdateMessage, @maxRetries }, { @transports }, @_internalRequire("messageExecutor"), @runner, @fromPoison
+      .then => new QueueProcessor @queue, { @waitingTime, @timeToUpdateMessage, @maxRetries }, { @transports }, @_internalRequire("messageExecutor"), @runner, fromPoison: @poison
 
     _internalRequire: (name) -> require "./#{@implementation}/#{name}"
