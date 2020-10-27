@@ -17,7 +17,7 @@ eventsToLog = (logger) ->
 module.exports =
   class LongTaskQueueReader extends EventEmitter
 
-    constructor: (@queue, { @waitingTime = 60, @visibilityTimeout = 60, @maxRetries = 10 }, { level = "info", transports = []}, @MessageExecutor, @runner) ->
+    constructor: (@queue, { @waitingTime = 60, @visibilityTimeout = 60, @maxRetries = 10 }, { level = "info", transports = []}, @MessageExecutor, @runner, @fromPoison) ->
       logger = new winston.Logger { level, transports }
       for eventName, action of eventsToLog logger
         @on "#{eventName}", action
@@ -45,7 +45,7 @@ module.exports =
     _nextTimeout: (message) =>
       if _.isEmpty message then convert(@waitingTime).from("s").to("ms") else 0
       
-    _buildExecutor: (message) => new @MessageExecutor { @runner, message, @maxRetries }
+    _buildExecutor: (message) => new @MessageExecutor { @runner, message, @maxRetries, @fromPoison }
 
     _execute: (message) =>
       keepAliveMessage = @_createKeepAlive message

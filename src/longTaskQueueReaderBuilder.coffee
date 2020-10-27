@@ -19,7 +19,7 @@ module.exports =
       @
 
     withQueue: (opts) ->
-      { @waitingTime, @timeToUpdateMessage, @fromPoison } = opts
+      { @waitingTime, @timeToUpdateMessage } = opts
       Queue = @_internalRequire("queue#{ if @fromPoison then ".poison" else "" }")
       @queue = new Queue opts
       @dependencies.push @queue
@@ -33,6 +33,6 @@ module.exports =
 
     build: ->
       Promise.map @dependencies, (dependency) -> dependency.initialize()
-      .then => new QueueProcessor @queue, { @waitingTime, @timeToUpdateMessage, @maxRetries }, { @transports }, @_internalRequire("messageExecutor"), @runner
+      .then => new QueueProcessor @queue, { @waitingTime, @timeToUpdateMessage, @maxRetries }, { @transports }, @_internalRequire("messageExecutor"), @runner, @fromPoison
 
     _internalRequire: (name) -> require "./#{@implementation}/#{name}"
