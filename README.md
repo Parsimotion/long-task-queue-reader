@@ -12,7 +12,7 @@ queueConfig = {
   accountName: "ACCOUNT_NAME"
   accountKey: "ACCOUNT_KEY"
   queueName: "QUEUE_NAME"
-  waitingTime: 10  # time to sleep when queue is empty (ms)
+  waitingTime: 10  # time to sleep when queue is empty (sec)
   visibilityTimeout: #time to
 }
 
