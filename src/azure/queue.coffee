@@ -1,6 +1,7 @@
 _ = require "lodash"
 AzureQueueNode = require "azure-queue-node"
 Promise = require "bluebird"
+retry = require "bluebird-retry"
 
 debug = require("debug")("long-task-queue-reader:queue")
 
@@ -29,7 +30,7 @@ module.exports =
 
     remove: ({messageId, popReceipt}) ->
       debug "Removing message: [messageId: #{messageId}, popReceipt: #{popReceipt}]"
-      @client.deleteMessageAsync @queueName, messageId, popReceipt
+      retry () => @client.deleteMessageAsync @queueName, messageId, popReceipt
       .tap -> debug "Removed messageId: #{messageId}"
 
     push: (message) -> @client.putMessageAsync @queueName, message
