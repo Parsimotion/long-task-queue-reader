@@ -1,7 +1,8 @@
+_ = require "lodash"
 AbstractMessageExecutor = require("../abstractMessageExecutor")
 
 module.exports =
   class AzureMessageExecutor extends AbstractMessageExecutor
-    _body_: () => @message.messageText    
+    _body_: () => _.assign {}, @message.messageText. { messageId: @message.messageId }     
     _receiveCount_: () => @message.dequeueCount
     
