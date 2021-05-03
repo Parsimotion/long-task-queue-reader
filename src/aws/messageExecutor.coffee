@@ -1,8 +1,8 @@
-_ = require "lodash"
 AbstractMessageExecutor = require("../abstractMessageExecutor")
 
 module.exports =
   class AwsMessageExecutor extends AbstractMessageExecutor
-    _body_: () => _.assign {},  @message.Body, @message.MessageId
+    _body_: () => @message.Body
     _receiveCount_: () => parseInt(@message.Attributes.ApproximateReceiveCount)
+    _messageId_: () => @message.MessageId
     
