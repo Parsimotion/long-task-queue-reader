@@ -1,5 +1,6 @@
 async = require "async"
 convert = require "convert-units"
+retry = require "bluebird-retry"
 
 module.exports =
   class KeepAliveMessage
@@ -21,6 +22,6 @@ module.exports =
       async.queue (task, callback) =>
         @_callToTouch().finally -> callback()
 
-    _callToTouch: => @touch @message
+    _callToTouch: => retry () => @touch @message
 
     _timeToTouch: => convert(@visibilityTimeout).from("s").to("ms") / 2

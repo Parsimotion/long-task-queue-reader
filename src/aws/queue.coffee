@@ -1,6 +1,7 @@
 _ = require "lodash"
 AWS = require 'aws-sdk'
 Promise = require "bluebird"
+retry = require "bluebird-retry"
 
 debug = require("debug")("long-task-queue-reader:queue")
 tryParse = (it) -> try JSON.parse(it)
@@ -58,7 +59,7 @@ module.exports =
 
     remove: ({ MessageId, ReceiptHandle }) ->
       debug "Removing message: [messageId: #{MessageId}, popReceipt: #{ReceiptHandle}]"
-      @client.deleteMessageAsync { QueueUrl: @queueUrl, ReceiptHandle }
+      retry () => @client.deleteMessageAsync { QueueUrl: @queueUrl, ReceiptHandle }
       .tap -> debug "Removed messageId: #{MessageId}"
 
     push: (message) -> @_push @queueUrl, message
