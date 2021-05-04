@@ -12,7 +12,7 @@ eventsToLog = (logger) ->
   "message-start": (message) -> logger.info "Iniciando el proceso de un mensaje", message
   "message-finish": (message) -> logger.info "Finalizo la ejecucion de un proceso", message
   "message-touch": ({ messageId, MessageId, messageText, Body }) -> logger.info "Touching #{messageId or MessageId}", messageText or Body
-  "job_error": ({ method, message, err }) -> logger.error "An error has ocurred in #{method}(#{ message.messageId or message.MessageId })", err
+  "job_error": ({ method, message, err }) -> logger.error "An error has ocurred in #{method}(#{ message?.messageId or message?.MessageId })", err
 
 module.exports =
   class LongTaskQueueReader extends EventEmitter
@@ -56,7 +56,7 @@ module.exports =
       .execute()
       .tap => @_removeSafety message
       .catch MaxRetriesExceededException, (e) => @_sendToPoison message
-      .catch (err) => @emit "job_error", { method: "_execute", err }
+      .catch (err) => @emit "job_error", { method: "_execute", err, message }
       .tap -> keepAliveMessage.destroy()
       .then => @emit "message-finish", message
 
