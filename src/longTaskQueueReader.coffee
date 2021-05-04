@@ -11,8 +11,8 @@ eventsToLog = (logger) ->
   "job-finish-messages": -> logger.info "Finalizo la ejecucion de mensajes"
   "message-start": (message) -> logger.info "Iniciando el proceso de un mensaje", message
   "message-finish": (message) -> logger.info "Finalizo la ejecucion de un proceso", message
-  "message-touch": ({messageId, MessageId, messageText, Body}) -> logger.info "Touching #{messageId or MessageId}", messageText or Body
-  "job_error": ({method, err}) -> logger.error "An error has ocurred in #{method}", err
+  "message-touch": ({ messageId, MessageId, messageText, Body }) -> logger.info "Touching #{messageId or MessageId}", messageText or Body
+  "job_error": ({ method, message, err }) -> logger.error "An error has ocurred in #{method}(#{ message.messageId or message.MessageId })", err
 
 module.exports =
   class LongTaskQueueReader extends EventEmitter
@@ -69,10 +69,10 @@ module.exports =
 
     _removeSafety: (message) =>
       @queue.remove message
-      .catch (err) => @emit "job_error", { method: "_removeSafety", err }
+      .catch (err) => @emit "job_error", { method: "_removeSafety", message, err }
 
     _touch: (message) =>
       @emit "message-touch", message
       @queue.update @visibilityTimeout, message
       .tap (response) -> _.assign message, popReceipt: response.popReceipt
-      .catch (err) => @emit "job_error", { method: "_touch", err }
+      .catch (err) => @emit "job_error", { method: "_touch", message, err }
