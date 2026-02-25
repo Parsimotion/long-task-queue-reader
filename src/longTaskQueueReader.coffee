@@ -8,6 +8,7 @@ MaxRetriesExceededException = require "./maxRetriesExceededException"
 
 eventsToLog = (logger) ->
   "job-get-messages": -> logger.info "Obteniendo mensajes nuevas"
+  "job-early-finish-messages": -> logger.info "Finalizo la ejecucion de mensajes antes de tiempo"
   "job-finish-messages": -> logger.info "Finalizo la ejecucion de mensajes"
   "message-start": (message) -> logger.info "Iniciando el proceso de un mensaje", message
   "message-finish": (message) -> logger.info "Finalizo la ejecucion de un proceso", message
@@ -17,7 +18,7 @@ eventsToLog = (logger) ->
 module.exports =
   class LongTaskQueueReader extends EventEmitter
 
-    constructor: (@queue, { @waitingTime = 60, @visibilityTimeout = 60, @maxRetries = 10 }, { level = "info", transports = []}, @MessageExecutor, @runner, @fromPoison) ->
+    constructor: (@queue, { @waitingTime = 60, @visibilityTimeout = 60, @maxRetries = 10, @earlyFinish = false }, { level = "info", transports = []}, @MessageExecutor, @runner, @fromPoison) ->
       logger = new winston.Logger { level, transports }
       for eventName, action of eventsToLog logger
         @on "#{eventName}", action
@@ -40,6 +41,10 @@ module.exports =
       .get 0
       .tap (message) => @_execute(message) if message?
       .tap => @emit "job-finish-messages"
+      .tap => 
+        if @earlyFinish
+          @emit "job-early-finish-messages"
+          process.exit(0)
       .catch (err) => @emit "job_error", { method: "_executePendingSynchronization", err }
 
     _nextTimeout: (message) =>
