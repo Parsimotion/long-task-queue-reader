@@ -34,8 +34,6 @@ module.exports =
     
     withMaxRetries: (@maxRetries) -> @
     
-    withExecutionMode: (@executionMode) -> @
-    
     withExecutionMode: (mode) ->
       ExecutionMode = executionModes[mode] or executionModes.continuous
       @executionMode = new ExecutionMode()
