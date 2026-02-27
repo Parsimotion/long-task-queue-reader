@@ -1,6 +1,9 @@
 winston = require "winston"
 Promise = require "bluebird"
 QueueProcessor = require "./longTaskQueueReader"
+executionModes =
+  continuous: require "./executionModes/continuousExecutionMode"
+  once: require "./executionModes/onceExecutionMode"
 
 module.exports =
   class LongTaskQueueReaderBuilder
@@ -31,10 +34,17 @@ module.exports =
     
     withMaxRetries: (@maxRetries) -> @
     
+    withExecutionMode: (@executionMode) -> @
+    
+    withExecutionMode: (mode) ->
+      ExecutionMode = executionModes[mode] or executionModes.continuous
+      @executionMode = new ExecutionMode()
+      @
+    
     withImplementation: (@implementation) -> @
 
     build: ->
       Promise.map @dependencies, (dependency) -> dependency.initialize()
-      .then => new QueueProcessor @queue, { @waitingTime, @timeToUpdateMessage, @maxRetries }, { @transports }, @_internalRequire("messageExecutor"), @runner, @poison
+      .then => new QueueProcessor @queue, { @waitingTime, @timeToUpdateMessage, @maxRetries }, { @transports }, @_internalRequire("messageExecutor"), @runner, @poison, @executionMode
 
     _internalRequire: (name) -> require "./#{@implementation}/#{name}"
