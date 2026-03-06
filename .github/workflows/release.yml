@@ -19,6 +19,7 @@ jobs:
     with:
       prereleaseTag: ${{ inputs.prereleaseTag }}
       node-version: "18"
+      bun: true
       build-output-dir: "lib"  # Directorio de salida del build en este proyecto
     secrets:
       NPM_PUBLISH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
