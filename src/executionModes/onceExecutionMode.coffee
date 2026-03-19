@@ -7,3 +7,10 @@ module.exports =
       .tap () => reader.emit "job-finish"
       .tap () => process.exit 0
 
+    handleError: (err, reader, keepAliveMessage, message) ->
+      super err, reader, keepAliveMessage, message
+      .then () => 
+        reader.emit "job-error-finish"
+        process.exit 1
+
+
