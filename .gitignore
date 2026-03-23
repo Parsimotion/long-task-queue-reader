@@ -41,3 +41,6 @@ lib
 
 yarn.lock
 *.sublime-workspace
+site.config
+*.env
+*.env.*
