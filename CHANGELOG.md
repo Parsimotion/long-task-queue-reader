@@ -1,3 +1,10 @@
+## [0.8.1](https://github.com/Parsimotion/long-task-queue-reader/compare/v0.8.0...v0.8.1) (2026-03-25)
+
+
+### Bug Fixes
+
+* end process after getting an error ([8522d15](https://github.com/Parsimotion/long-task-queue-reader/commit/8522d15c3bf9ca5d3bb404638c1ed4f2951335db))
+
 # [0.8.0](https://github.com/Parsimotion/long-task-queue-reader/compare/v0.7.2...v0.8.0) (2026-03-06)
 
 
