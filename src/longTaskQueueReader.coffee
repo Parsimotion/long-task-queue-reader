@@ -10,6 +10,7 @@ eventsToLog = (logger) ->
   "job-get-messages": -> logger.info "Obteniendo mensajes nuevas"
   "job-finish-messages": -> logger.info "Finalizo la ejecucion de mensajes"
   "job-finish": -> logger.info "Finalizo la ejecucion"
+  "job-error-finish": -> logger.info "Finalizo la ejecucion por un error"
   "message-start": (message) -> logger.info "Iniciando el proceso de un mensaje", message
   "message-finish": (message) -> logger.info "Finalizo la ejecucion de un proceso", message
   "message-touch": ({ messageId, MessageId, messageText, Body }) -> logger.info "Touching #{messageId or MessageId}", messageText or Body
@@ -38,8 +39,7 @@ module.exports =
       .execute()
       .tap => @_removeSafety message
       .catch MaxRetriesExceededException, (e) => @_sendToPoison message
-      .catch (err) => @emit "job_error", { method: "_execute", err, message }
-      .tap -> keepAliveMessage.destroy()
+      .catch (err) => @executionMode.handleError(err, @, keepAliveMessage, message)
       .then => @emit "message-finish", message
 
     _sendToPoison: (message) =>
