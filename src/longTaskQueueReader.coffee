@@ -38,6 +38,7 @@ module.exports =
       @_buildExecutor message
       .execute()
       .tap => @_removeSafety message
+      .tap -> keepAliveMessage.destroy()
       .catch MaxRetriesExceededException, (e) => @_sendToPoison message
       .catch (err) => @executionMode.handleError(err, @, keepAliveMessage, message)
       .then => @emit "message-finish", message
