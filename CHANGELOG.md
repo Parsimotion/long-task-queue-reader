@@ -1,3 +1,12 @@
+## [0.8.2](https://github.com/Parsimotion/long-task-queue-reader/compare/v0.8.1...v0.8.2) (2026-05-11)
+
+
+### Bug Fixes
+
+* destroy before remove message ([4dacba0](https://github.com/Parsimotion/long-task-queue-reader/commit/4dacba03b01b8939dbac838fa113e8dd3f14b276))
+* ensure keepAliveMessage is destroyed after execution ([ead09f8](https://github.com/Parsimotion/long-task-queue-reader/commit/ead09f833ce75f5f05d4ac1550c5911a9a16501b))
+* keepalive destroy ([597f8d2](https://github.com/Parsimotion/long-task-queue-reader/commit/597f8d28a4c71a1d33e91b55e32d110589fe76b5))
+
 ## [0.8.1](https://github.com/Parsimotion/long-task-queue-reader/compare/v0.8.0...v0.8.1) (2026-03-25)
 
 
