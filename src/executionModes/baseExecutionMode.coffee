@@ -22,7 +22,6 @@ module.exports =
     _nextTimeout: (reader, message) ->
       if _.isEmpty message then convert(reader.waitingTime).from("s").to("ms") else 0
 
-    handleError: (err, reader, keepAliveMessage, message) ->
+    handleError: (err, reader, message) ->
       reader.emit "job_error", { method: "executionMode.execute", err, message }
       Promise.resolve()
-      .tap -> keepAliveMessage.destroy()
