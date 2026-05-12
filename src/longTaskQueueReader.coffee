@@ -21,7 +21,7 @@ module.exports =
 
     constructor: (@queue, { @waitingTime = 60, @visibilityTimeout = 60, @maxRetries = 10 }, { level = "info", transports = []}, @MessageExecutor, @runner, @fromPoison, executionMode = new ContinuousExecutionMode()) ->
       @executionMode = executionMode
-      logger = new winston.Logger { level, transports }
+      logger = winston.createLogger { level, transports }
       for eventName, action of eventsToLog logger
         @on "#{eventName}", action
 

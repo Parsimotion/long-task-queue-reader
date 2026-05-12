@@ -12,10 +12,14 @@ module.exports =
       @_transport = new WinstonCloudWatch {
           logGroupName,
           logStreamName,
-          awsAccessKeyId: access,
-          awsSecretKey: secret,
           level,
-          awsRegion: region or 'us-east-1'
+          awsOptions: {
+            credentials: {
+              accessKeyId: access,
+              secretAccessKey: secret
+            },
+            region: region or 'us-east-1'
+          }
         }
 
     initialize: -> @_transport.initialize?()
