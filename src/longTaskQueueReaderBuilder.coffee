@@ -10,7 +10,7 @@ module.exports =
 
     constructor: (@implementation = "azure", @poison = false) ->
       @transports = [
-        new winston.transports.Console timestamp: true
+        new winston.transports.Console format: winston.format.simple()
       ]
       @dependencies = []
 

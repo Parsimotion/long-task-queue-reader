@@ -1,4 +1,4 @@
-async = require "async"
+asyncModule = require "async"
 convert = require "convert-units"
 retry = require "bluebird-retry"
 
@@ -19,7 +19,7 @@ module.exports =
       clearInterval @intervalHandler
 
     _buildQueue: =>
-      async.queue (task, callback) =>
+      asyncModule.queue (task, callback) =>
         @_callToTouch().finally -> callback()
 
     _callToTouch: => retry () => @touch @message

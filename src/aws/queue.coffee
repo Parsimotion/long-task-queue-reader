@@ -1,5 +1,5 @@
 _ = require "lodash"
-AWS = require 'aws-sdk'
+{ SQSClient, CreateQueueCommand, SendMessageCommand, ReceiveMessageCommand, DeleteMessageCommand, ChangeMessageVisibilityCommand, GetQueueUrlCommand } = require "@aws-sdk/client-sqs"
 Promise = require "bluebird"
 retry = require "bluebird-retry"
 
@@ -18,56 +18,55 @@ module.exports =
       @client = @_buildClient options
       @attributes = _.defaults options.config, queueConfigDefaults
 
-    initialize: => 
+    initialize: =>
       Promise.map [ @queueName, @_poisonQueueName() ], @create
       .then(@_setQueueUrl)
 
     _setQueueUrl: () =>
       @_queueUrl @queueName
-        .get "QueueUrl"
-        .then (@queueUrl) =>
+        .then (data) => @queueUrl = data.QueueUrl
 
-    create: (queueName) => 
-      @client.createQueueAsync { QueueName: queueName, Attributes: @attributes }
-      .catch (e) => throw e unless e.code is "QueueAlreadyExists"
+    create: (queueName) =>
+      Promise.resolve(@client.send new CreateQueueCommand { QueueName: queueName, Attributes: @attributes })
+      .catch (e) => throw e unless e.name is "QueueAlreadyExists"
 
-    sendToPoison: (message) ->  
+    sendToPoison: (message) ->
       @pushPoison message.Body
 
     messages: (opts = {}) ->
-      @client.receiveMessageAsync {
+      Promise.resolve(@client.send new ReceiveMessageCommand {
         AttributeNames: [ "All" ],
         MaxNumberOfMessages: opts.maxMessages or 1,
         MessageAttributeNames: [ ],
         QueueUrl: @queueUrl,
         VisibilityTimeout: opts.visibilityTimeout or 120,
         WaitTimeSeconds: opts.waitingTime or 0
-      }
-      .then (data) -> 
+      })
+      .then (data) ->
         return [] unless data.Messages
         debug "Received Messages: %o", _.map(data.Messages, 'Body')
         data.Messages.map (it) => _.update(it, "Body", tryParse)
 
     update: (timeout, { MessageId, ReceiptHandle, Body }) ->
       debug "Updating [timeout: #{timeout}, messageId: #{MessageId}, popReceipt: #{ReceiptHandle}, messageText: #{JSON.stringify Body}]"
-      @client.changeMessageVisibilityAsync {
+      Promise.resolve(@client.send new ChangeMessageVisibilityCommand {
         ReceiptHandle,
         QueueUrl: @queueUrl,
         VisibilityTimeout: timeout
-      }
+      })
       .tap (message) -> debug "Updated message: %o", message
 
     remove: ({ MessageId, ReceiptHandle }) ->
       debug "Removing message: [messageId: #{MessageId}, popReceipt: #{ReceiptHandle}]"
-      retry () => @client.deleteMessageAsync { QueueUrl: @queueUrl, ReceiptHandle }
+      retry () => @client.send new DeleteMessageCommand { QueueUrl: @queueUrl, ReceiptHandle }
       .tap -> debug "Removed messageId: #{MessageId}"
 
     push: (message) -> @_push @queueUrl, message
-    
+
     pushPoison: (message) -> @_push @_poisonQueueUrl(), message
-    
+
     _push: (queueUrl, message) =>
-      @client.sendMessageAsync {
+      @client.send new SendMessageCommand {
         DelaySeconds: 0,
         MessageAttributes: {},
         MessageBody: JSON.stringify(message),
@@ -75,19 +74,19 @@ module.exports =
       }
 
     _poisonQueueUrl: -> @_toPoison @queueUrl
-    
+
     _poisonQueueName: -> @_toPoison @queueName
 
     _toPoison: (it) -> "#{it}-poison"
-    
-    _queueUrl: (queueName) -> 
-      @client.getQueueUrlAsync QueueName: queueName
+
+    _queueUrl: (queueName) ->
+      Promise.resolve(@client.send new GetQueueUrlCommand { QueueName: queueName })
 
     _buildClient: ({ access, secret, region = "us-east-1" }) ->
-      config = new AWS.Config {
-        accessKeyId: access,
-        secretAccessKey: secret,
-        region: region
+      new SQSClient {
+        credentials: {
+          accessKeyId: access,
+          secretAccessKey: secret
+        },
+        region
       }
-      Promise.promisifyAll new AWS.SQS(config), filter: (functionName) -> !_(functionName).endsWith("Async")
-
