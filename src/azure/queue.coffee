@@ -6,7 +6,8 @@ retry = require "bluebird-retry"
 debug = require("debug")("long-task-queue-reader:queue")
 
 encode = (message) -> Buffer.from(String(message)).toString("base64")
-decode = (text) -> Buffer.from(text, "base64").toString("utf-8")
+tryParse = (it) -> try JSON.parse(it)
+decode = (text) -> tryParse Buffer.from(text, "base64").toString("utf-8")
 
 module.exports =
   class Queue
