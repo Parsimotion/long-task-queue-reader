@@ -10,6 +10,8 @@ queueConfigDefaults = {
   MessageRetentionPeriod: "28800" # seconds (8 hrs)
 }
 
+BASE_QUEUE_URL = process.env.AWS_BASE_QUEUE_URL
+
 module.exports =
   class Queue
 
@@ -18,14 +20,12 @@ module.exports =
       @client = @_buildClient options
       @attributes = _.defaults options.config, queueConfigDefaults
 
-    initialize: => 
+    initialize: =>
       Promise.map [ @queueName, @_poisonQueueName() ], @create
       .then(@_setQueueUrl)
 
     _setQueueUrl: () =>
-      @_queueUrl @queueName
-        .get "QueueUrl"
-        .then (@queueUrl) =>
+      @queueUrl = "#{BASE_QUEUE_URL}/#{@queueName}"
 
     create: (queueName) => 
       @client.createQueueAsync { QueueName: queueName, Attributes: @attributes }
@@ -78,10 +78,7 @@ module.exports =
     
     _poisonQueueName: -> @_toPoison @queueName
 
-    _toPoison: (it) -> "#{it}-poison"
-    
-    _queueUrl: (queueName) -> 
-      @client.getQueueUrlAsync QueueName: queueName
+    _toPoison: (it) -> "#{it}-dlq"
 
     _buildClient: ({ access, secret, region = "us-east-1" }) ->
       config = new AWS.Config {
